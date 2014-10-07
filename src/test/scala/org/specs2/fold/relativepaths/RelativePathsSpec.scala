@@ -24,7 +24,7 @@ class RelativePathsSpec extends Specification { def is = s2"""
  * doesn't and shouldn't compile
  *
  * val dir2 = Root </> Root
- * 
+ *
  */
 
 

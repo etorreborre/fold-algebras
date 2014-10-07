@@ -41,7 +41,7 @@ import name._
         new RelativeDirectory {
           type T = Relative.type
           def fold[T](paths: RelativePaths[T]): T =
-            paths.dir(List(paths.dir(name), other.fold(paths)))
+            paths.prepend(name, other.fold(paths))
 
         }
 
@@ -50,7 +50,7 @@ import name._
       def </>(other: Name) = new RelativeDirectory {
         type T = Relative.type
         def fold[T](paths: RelativePaths[T]): T =
-          paths.dir(List(paths.dir(name), paths.dir(other)))
+          paths.prepend(name, paths.dir(other))
       }
 
     }
@@ -60,13 +60,13 @@ import name._
       def </>(other: Name) = new RelativeDirectory {
         type T = directory.T
         def fold[T](paths: RelativePaths[T]): T =
-          paths.dir(List(directory.fold(paths), paths.dir(other)))
+          paths.append(directory.fold(paths), other)
       }
       def </>(other: RelativeDirectory)(implicit ev: IsRelative[other.T]) =
         new RelativeDirectory {
           type T = directory.T
           def fold[T](paths: RelativePaths[T]): T =
-            paths.dir(List(directory.fold(paths), other.fold(paths)))
+            paths.concat(directory.fold(paths), other.fold(paths))
         }
     }
 

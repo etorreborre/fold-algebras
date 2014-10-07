@@ -27,12 +27,15 @@ import name._
 
   trait Dirs[T] {
     def dir(name: Name): T
-    def dir(dirs: List[T]): T
+    def concat(dir1: T, dir2: T): T
+
+    def prepend(name: Name, dir1: T): T =
+      concat(dir(name), dir1)
+
+    def append(dir1: T, name: Name): T =
+      concat(dir1, dir(name))
   }
 
-  object Dirs {
-    def apply[T : Dirs] = implicitly[Dirs[T]]
-  }
 
   /**
    * A directory is a type capable of folding any Dirs algebra
@@ -56,12 +59,12 @@ import name._
     implicit class ToDir(name: Name) {
       def </>(other: Name) = new Directory {
         def fold[T](dirs: Dirs[T]): T =
-          dirs.dir(List(dirs.dir(name), dirs.dir(other)))
+          dirs.prepend(name, dirs.dir(other))
       }
 
       def </>(other: Directory) = new Directory {
         def fold[T](dirs: Dirs[T]): T =
-          dirs.dir(List(dirs.dir(name), other.fold(dirs)))
+          dirs.prepend(name, other.fold(dirs))
       }
     }
 
@@ -69,13 +72,13 @@ import name._
     implicit class ToDirFromDirectory(directory: Directory) {
       def </>(other: Name) = new Directory {
         def fold[T](dirs: Dirs[T]): T =
-          dirs.dir(List(directory.fold(dirs), dirs.dir(other)))
+          dirs.append(directory.fold(dirs), other)
       }
 
       def </>(other: Directory) =
         new Directory {
           def fold[T](dirs: Dirs[T]): T =
-            dirs.dir(List(directory.fold(dirs), other.fold(dirs)))
+            dirs.concat(directory.fold(dirs), other.fold(dirs))
         }
     }
 
@@ -97,8 +100,11 @@ import name._
   }
 
   trait ShowDirs extends Dirs[String] {
-    def dir(name: Name): String = name.name
-    def dir(dirs: List[String]) = dirs.mkString("/")
+    def dir(name: Name): String =
+      name.name
+
+    def concat(dir1: String, dir2: String): String =
+      dir1+"/"+dir2
   }
 
   object ShowDirs extends ShowDirs
@@ -107,10 +113,8 @@ import name._
     def dir(name: Name): PrettyPrint =
       new PrettyPrint { def pretty = name.name }
 
-    def dir(dirs: List[PrettyPrint]): PrettyPrint =
-      new PrettyPrint {
-        def pretty = dirs.map(_.pretty).mkString("/")
-      }
+    def concat(dir1: PrettyPrint, dir2: PrettyPrint): PrettyPrint =
+      new PrettyPrint { def pretty = dir1.pretty+"/"+dir2.pretty }
   }
 
   object PrettyPrintDirs extends PrettyPrintDirs
