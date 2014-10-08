@@ -1,5 +1,10 @@
 package org.specs2.fold.name
 
+/**
+ * Class of Names which can be used in directory and file paths
+ *
+ * They must not contain a "/"
+ */
 case class Name private(name: String) extends AnyVal
 
 object Name {

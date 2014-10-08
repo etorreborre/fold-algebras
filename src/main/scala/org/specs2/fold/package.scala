@@ -2,6 +2,9 @@ package org.specs2
 
 import org.specs2.reflect.Compat210.blackbox._
 
+/**
+ * Macros to create Names from literals
+ */
 package object fold {
   import name._
 
